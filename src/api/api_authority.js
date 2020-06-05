@@ -1,12 +1,5 @@
 import request from '@/utils/request'
 
-export function getRoutes() {
-  return request({
-    url: '/vue-element-admin/routes',
-    method: 'get'
-  })
-}
-
 export function getApiList(query) {
   return request({
     url: '/casbin',
@@ -15,25 +8,25 @@ export function getApiList(query) {
   })
 }
 
-export function addRole(data) {
+export function addApi(data) {
   return request({
-    url: '/role',
+    url: '/casbin',
     method: 'post',
     data
   })
 }
 
-export function updateRole(id, data) {
+export function updateApi(id, data) {
   return request({
-    url: `/role/${id}`,
+    url: `/casbin/${id}`,
     method: 'put',
     data
   })
 }
 
-export function deleteRole(id) {
+export function deleteApi(id) {
   return request({
-    url: `/role/${id}`,
+    url: `/casbin/${id}`,
     method: 'delete'
   })
 }

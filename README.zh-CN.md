@@ -235,5 +235,3 @@ Modern browsers and Internet Explorer 10+.
 ## License
 
 [MIT](https://github.com/fanhengyuan/vue-element-admin/blob/master/LICENSE)
-
-Copyright (c) 2017-present PanJiaChen

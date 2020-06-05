@@ -38,13 +38,20 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.p" :limit.sync="listQuery.n" @pagination="getList" />
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'创建角色'">
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'创建'">
       <el-form :model="api" label-width="80px" label-position="left">
         <el-form-item label="角色 Key">
           <el-input v-model="api.v0" placeholder="角色 Key" :disabled="dialogType==='edit'? true:false" />
         </el-form-item>
         <el-form-item label="路由路径">
           <el-input v-model="api.v1" placeholder="路由路径" />
+        </el-form-item>
+        <el-form-item label="请求类型">
+          <el-radio-group v-model="api.v2">
+            <el-radio v-for="(v, k) in method" :key="v" :label="k">
+              <el-tag :type="method[k]" size="mini" effect="plain">{{ k }}</el-tag>
+            </el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
@@ -57,7 +64,7 @@
 
 <script>
 import { deepClone } from '@/utils'
-import { getApiList, addRole, deleteRole, updateRole } from '@/api/api_authority'
+import { getApiList, addApi, deleteApi, updateApi } from '@/api/api_authority'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 const defaultAPi = {
@@ -142,7 +149,7 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.role_id)
+          await deleteApi(row.role_id)
           this.$message({
             type: 'success',
             message: '删除成功'
@@ -155,9 +162,9 @@ export default {
       const isEdit = this.dialogType === 'edit'
 
       if (isEdit) {
-        await updateRole(this.api.id, this.api)
+        await updateApi(this.api.id, this.api)
       } else {
-        const { data } = await addRole(this.api)
+        const { data } = await addApi(this.api)
         this.api.v0 = data.role_id
       }
 
