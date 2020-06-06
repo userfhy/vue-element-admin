@@ -41,15 +41,36 @@
     <el-dialog :close-on-click-modal="false" :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'创建'">
       <el-form :model="api" label-width="80px" label-position="left">
         <el-form-item label="角色 Key">
-          <el-input v-model="api.v0" placeholder="角色 Key" :disabled="dialogType==='edit'? true:false" />
+          <el-select v-model="api.v0" placeholder="请选择" :disabled="dialogType==='edit'? true:false" @change="handleRoleSelectChange">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.role_id"
+              :value="item.role_key"
+            >
+              <span style="float: left">{{ item.role_key }}</span>
+              <span style="float: right; color: #8492a6; font-size: 10px">{{ item.role_name }}</span>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="路由路径">
+          <!-- <el-select v-model="api.v1" class="autocomplete-select" filterable placeholder="请选择" @change="handlePathSelect">
+            <el-option
+              v-for="item in sysRouterList"
+              :key="item.role_id"
+              :value="item.path"
+            >
+              <div>
+                {{ item.value }}
+                <el-tag class="method-tag" :type="method[item.method]" size="mini" effect="plain">{{ item.method }}</el-tag>
+              </div>
+            </el-option>
+          </el-select> -->
           <el-autocomplete
             v-model="api.v1"
             :fetch-suggestions="querySearchAsync"
             placeholder="路由路径"
             class="autocomplete-input"
-            @select="handleSelect"
+            @select="handlePathSelect"
           >
             <template slot-scope="{ item }">
               <div>
@@ -77,6 +98,7 @@
 
 <script>
 import { deepClone } from '@/utils'
+import { getRoles } from '@/api/role'
 import { getSysRouterList, getApiList, addApi, deleteApi, updateApi } from '@/api/api_authority'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -92,8 +114,11 @@ export default {
   data() {
     return {
       api: Object.assign({}, defaultAPi),
-      ApiList: [],
+      apiList: [],
+      groupApiList: [],
+      rolesList: [],
       sysRouterList: [],
+      sysRouterFilterList: [],
       timeout: null,
       dialogVisible: false,
       dialogType: 'new',
@@ -108,7 +133,8 @@ export default {
       listLoading: true,
       listQuery: {
         p: 1,
-        n: 10
+        n: 10,
+        group_by: ''
       },
       method: {
         'GET': '',
@@ -121,22 +147,36 @@ export default {
   computed: {
   },
   created() {
-    this.getList()
+    this.getList() // 规则列表
+    this.getRolesList() // 角色列表
+    this.getGroupList() // 分组列表
   },
   mounted() {
-    this.getRouterList()
+    this.getRouterList() // 后端路由接口
   },
   methods: {
     async getApi() {
       const res = await getApiList()
-      this.ApiList = res.data
+      this.apiList = res.data
+    },
+    getRolesList() {
+      // 角色
+      getRoles({ p: 1, n: 100 }).then(response => {
+        this.rolesList = response.data.list
+      })
     },
     getRouterList() {
+      // 后端路由接口
       getSysRouterList().then(res => {
         this.sysRouterList = res.data
         for (let i = 0, len = this.sysRouterList.length; i < len; i++) {
           this.sysRouterList[i].value = this.sysRouterList[i].path
         }
+      })
+    },
+    getGroupList() {
+      getApiList({ p: 1, n: 100, group_by: 'v0' }).then(response => {
+        this.groupApiList = response.data
       })
     },
     getList() {
@@ -210,6 +250,7 @@ export default {
     },
     querySearchAsync(queryString, cb) {
       var restaurants = this.sysRouterList
+
       var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants
 
       clearTimeout(this.timeout)
@@ -222,8 +263,27 @@ export default {
         return (state.value.toLowerCase().indexOf(queryString.toLowerCase()) !== -1)
       }
     },
-    handleSelect(item) {
-    //   console.log(item)
+    handleRoleSelectChange(item) {
+      // 过滤已存在路径
+      this.sysRouterFilterList = []
+      if (item in this.groupApiList.list) {
+        this.groupApiList.list[item].forEach(element => {
+          this.sysRouterFilterList.push({ value: element.v1, path: element.v1, method: element.v2 })
+        })
+      }
+    },
+    handlePathSelect(item) {
+      // 选中 api method
+      for (let index = 0; index < this.sysRouterFilterList.length; index++) {
+        if (this.sysRouterFilterList[index].method === item.method && this.sysRouterFilterList[index].path === item.path) {
+          this.$message({
+            type: 'warning',
+            message: '该角色对应的路由已经添加,不需要重复选择！'
+          })
+          return
+        }
+      }
+      this.api.v2 = item.method
     }
   }
 }
@@ -239,6 +299,9 @@ export default {
   }
 }
 
+// .autocomplete-select{
+//     display: flex;
+// }
 .autocomplete-input{
     display: flex;
     input{
