@@ -44,11 +44,11 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.p" :limit.sync="listQuery.n" @pagination="getList" />
 
     <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'创建角色'">
-      <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="角色 Key">
+      <el-form ref="role" :model="role" label-width="80px" :rules="rules" label-position="left">
+        <el-form-item label="角色 Key" prop="role_key">
           <el-input v-model="role.role_key" placeholder="角色 Key" :disabled="dialogType==='edit'? true:false" />
         </el-form-item>
-        <el-form-item label="角色名称">
+        <el-form-item label="角色名称" prop="role_name">
           <el-input v-model="role.role_name" placeholder="角色名称" />
         </el-form-item>
         <el-form-item label="描述">
@@ -62,7 +62,7 @@
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="confirmRole">确认</el-button>
+        <el-button type="primary" @click="confirmRole('role')">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -99,6 +99,16 @@ export default {
       listQuery: {
         p: 1,
         n: 10
+      },
+      rules: {
+        role_key: [
+          { required: true, message: '请输入角色 Key', trigger: 'blur' },
+          { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
+        ],
+        role_name: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' },
+          { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -149,7 +159,6 @@ export default {
       })
         .then(async() => {
           await deleteRole(row.role_id)
-          this.rolesList.splice($index, 1)
           this.$message({
             type: 'success',
             message: '删除成功'
@@ -158,36 +167,39 @@ export default {
         })
         .catch(err => { console.error(err) })
     },
-    async confirmRole() {
-      const isEdit = this.dialogType === 'edit'
-
-      if (isEdit) {
-        await updateRole(this.role.role_id, this.role)
-        for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].role_id === this.role.role_id) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-            break
-          }
+    async confirmRole(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          return false
         }
-      } else {
-        const { data } = await addRole(this.role)
-        this.role.role_id = data.role_id
-        this.rolesList.push(this.role)
-      }
+        const isEdit = this.dialogType === 'edit'
+        const { remark, role_key, role_name } = this.role
 
-      const { remark, role_key, role_name } = this.role
-      this.dialogVisible = false
-      this.$notify({
-        title: '角色信息修改成功',
-        dangerouslyUseHTMLString: true,
-        message: `
-            <div>角色 Key: ${role_key}</div>
-            <div>角色名称: ${role_name}</div>
-            <div>描述: ${remark}</div>
-          `,
-        type: 'success'
+        if (isEdit) {
+          updateRole(this.role.role_id, this.role).then(res => {
+            this.$notify({
+              title: '角色信息修改成功',
+              dangerouslyUseHTMLString: true,
+              message: `
+                    <div>角色 Key: ${role_key}</div>
+                    <div>角色名称: ${role_name}</div>
+                    <div>描述: ${remark}</div>
+                `,
+              type: 'success'
+            })
+          })
+        } else {
+          addRole(this.role).then(res => {
+            this.$message({
+              type: 'success',
+              message: '添加成功'
+            })
+          })
+        }
+
+        this.dialogVisible = false
+        this.getList()
       })
-      this.getList()
     }
   }
 }
