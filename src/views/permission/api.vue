@@ -38,13 +38,26 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.p" :limit.sync="listQuery.n" @pagination="getList" />
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'创建'">
+    <el-dialog :close-on-click-modal="false" :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'创建'">
       <el-form :model="api" label-width="80px" label-position="left">
         <el-form-item label="角色 Key">
           <el-input v-model="api.v0" placeholder="角色 Key" :disabled="dialogType==='edit'? true:false" />
         </el-form-item>
         <el-form-item label="路由路径">
-          <el-input v-model="api.v1" placeholder="路由路径" />
+          <el-autocomplete
+            v-model="api.v1"
+            :fetch-suggestions="querySearchAsync"
+            placeholder="路由路径"
+            class="autocomplete-input"
+            @select="handleSelect"
+          >
+            <template slot-scope="{ item }">
+              <div>
+                {{ item.value }}
+                <el-tag class="method-tag" :type="method[item.method]" size="mini" effect="plain">{{ item.method }}</el-tag>
+              </div>
+            </template>
+          </el-autocomplete>
         </el-form-item>
         <el-form-item label="请求类型">
           <el-radio-group v-model="api.v2">
@@ -64,7 +77,7 @@
 
 <script>
 import { deepClone } from '@/utils'
-import { getApiList, addApi, deleteApi, updateApi } from '@/api/api_authority'
+import { getSysRouterList, getApiList, addApi, deleteApi, updateApi } from '@/api/api_authority'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 const defaultAPi = {
@@ -80,6 +93,8 @@ export default {
     return {
       api: Object.assign({}, defaultAPi),
       ApiList: [],
+      sysRouterList: [],
+      timeout: null,
       dialogVisible: false,
       dialogType: 'new',
       checkStrictly: false,
@@ -108,10 +123,21 @@ export default {
   created() {
     this.getList()
   },
+  mounted() {
+    this.getRouterList()
+  },
   methods: {
     async getApi() {
       const res = await getApiList()
       this.ApiList = res.data
+    },
+    getRouterList() {
+      getSysRouterList().then(res => {
+        this.sysRouterList = res.data
+        for (let i = 0, len = this.sysRouterList.length; i < len; i++) {
+          this.sysRouterList[i].value = this.sysRouterList[i].path
+        }
+      })
     },
     getList() {
       this.listLoading = true
@@ -181,6 +207,23 @@ export default {
         type: 'success'
       })
       this.getList()
+    },
+    querySearchAsync(queryString, cb) {
+      var restaurants = this.sysRouterList
+      var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants
+
+      clearTimeout(this.timeout)
+      this.timeout = setTimeout(() => {
+        cb(results)
+      }, 1000 * Math.random())
+    },
+    createStateFilter(queryString) {
+      return (state) => {
+        return (state.value.toLowerCase().indexOf(queryString.toLowerCase()) !== -1)
+      }
+    },
+    handleSelect(item) {
+    //   console.log(item)
     }
   }
 }
@@ -195,4 +238,15 @@ export default {
     margin-bottom: 30px;
   }
 }
+
+.autocomplete-input{
+    display: flex;
+    input{
+        flex: 1;
+        -webkit-box-flex: 1;
+    }
+}
+ .method-tag{
+        float: right;
+    }
 </style>

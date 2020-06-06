@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function getSysRouterList() {
+  return request({
+    url: 'sys/router',
+    method: 'get'
+  })
+}
+
 export function getApiList(query) {
   return request({
     url: '/casbin',
