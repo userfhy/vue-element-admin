@@ -39,8 +39,8 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.p" :limit.sync="listQuery.n" @pagination="getList" />
 
     <el-dialog :close-on-click-modal="false" :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑':'创建'">
-      <el-form :model="api" label-width="80px" label-position="left">
-        <el-form-item label="角色 Key">
+      <el-form ref="api" :rules="rules" :model="api" label-width="80px" label-position="left">
+        <el-form-item label="角色 Key" prop="v0">
           <el-select v-model="api.v0" placeholder="请选择" :disabled="dialogType==='edit'? true:false" @change="handleRoleSelectChange">
             <el-option
               v-for="item in rolesList"
@@ -52,7 +52,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="路由路径">
+        <el-form-item label="路由路径" prop="v1">
           <!-- <el-select v-model="api.v1" class="autocomplete-select" filterable placeholder="请选择" @change="handlePathSelect">
             <el-option
               v-for="item in sysRouterList"
@@ -80,7 +80,7 @@
             </template>
           </el-autocomplete>
         </el-form-item>
-        <el-form-item label="请求类型">
+        <el-form-item label="请求类型" prop="v2">
           <el-radio-group v-model="api.v2">
             <el-radio v-for="(v, k) in method" :key="v" :label="k">
               <el-tag :type="method[k]" size="mini" effect="plain">{{ k }}</el-tag>
@@ -90,7 +90,7 @@
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="confirmRole">确认</el-button>
+        <el-button type="primary" @click="confirmRole('api')">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -141,6 +141,18 @@ export default {
         'POST': 'success',
         'PUT': 'warning',
         'DELETE': 'danger'
+      },
+      rules: {
+        v0: [
+          { required: true, message: '请选择角色 Key', trigger: 'change' }
+        ],
+        v1: [
+          { required: true, message: '请输入路由 Path', trigger: 'blur' },
+          { min: 4, max: 30, message: '长度在 4 到 30 个字符', trigger: 'blur' }
+        ],
+        v2: [
+          { required: true, message: '请选择请求 Method', trigger: 'change' }
+        ]
       }
     }
   },
@@ -224,29 +236,32 @@ export default {
         })
         .catch(err => { console.error(err) })
     },
-    async confirmRole() {
-      const isEdit = this.dialogType === 'edit'
+    confirmRole(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          return false
+        }
 
-      if (isEdit) {
-        await updateApi(this.api.id, this.api)
-      } else {
-        const { data } = await addApi(this.api)
-        this.api.v0 = data.role_id
-      }
+        const isEdit = this.dialogType === 'edit'
+        if (isEdit) {
+          updateApi(this.api.id, this.api).then(response => {
+            this.$message({
+              type: 'success',
+              message: '修改成功'
+            })
+          })
+        } else {
+          addApi(this.api).then(response => {
+            this.$message({
+              type: 'success',
+              message: '添加成功'
+            })
+          })
+        }
+        this.dialogVisible = false
 
-      const { v0, v1, v2 } = this.api
-      this.dialogVisible = false
-      this.$notify({
-        title: '修改成功',
-        dangerouslyUseHTMLString: true,
-        message: `
-            <div>角色 Key: ${v0}</div>
-            <div>PATH: ${v1}</div>
-            <div>描述: ${v2}</div>
-          `,
-        type: 'success'
+        this.getList()
       })
-      this.getList()
     },
     querySearchAsync(queryString, cb) {
       var restaurants = this.sysRouterList
