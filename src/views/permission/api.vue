@@ -241,7 +241,15 @@ export default {
         if (!valid) {
           return false
         }
-
+        for (let index = 0; index < this.sysRouterFilterList.length; index++) {
+          if (this.sysRouterFilterList[index].method === this.api.v2 && this.sysRouterFilterList[index].path === this.api.v1) {
+            this.$message({
+              type: 'error',
+              message: '该角色对应的路由已经存在,不需要重复添加！'
+            })
+            return false
+          }
+        }
         const isEdit = this.dialogType === 'edit'
         if (isEdit) {
           updateApi(this.api.id, this.api).then(response => {
