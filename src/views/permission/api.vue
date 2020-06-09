@@ -1,6 +1,27 @@
 <template>
   <div class="app-container">
     <el-button type="primary" @click="handleAddApi">创建规则</el-button>
+    <div class="filter-container">
+      <el-input v-model="listQuery.path" placeholder="路由路径" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.role" placeholder="角色" clearable class="filter-item">
+        <el-option
+          v-for="item in rolesList"
+          :key="item.role_id"
+          :value="item.role_key"
+        >
+          <span style="float: left">{{ item.role_key }}</span>
+          <span style="float: right; color: #8492a6; font-size: 10px">{{ item.role_name }}</span>
+        </el-option>
+      </el-select>
+      <el-select v-model="listQuery.method" placeholder="请求类型" style="width: 140px" clearable class="filter-item">
+        <el-option v-for="(v, k) in method" :key="k" :value="k">
+          <el-tag :type="method[k]" size="mini" effect="plain">{{ k }}</el-tag>
+        </el-option>
+      </el-select>
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+        搜索
+      </el-button>
+    </div>
 
     <el-table :data="list" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="Id" width="50">
@@ -333,7 +354,12 @@ export default {
         -webkit-box-flex: 1;
     }
 }
+
  .method-tag{
-        float: right;
-    }
+    float: right;
+}
+
+.filter-container{
+    margin-top: 10px;
+}
 </style>
