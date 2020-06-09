@@ -227,11 +227,12 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          await deleteApi(row.role_id)
+          await deleteApi(row.id, { v0: row.v0, v1: row.v1, v2: row.v2 })
           this.$message({
             type: 'success',
             message: '删除成功'
           })
+          this.listQuery.p = 1
           this.getList()
         })
         .catch(err => { console.error(err) })

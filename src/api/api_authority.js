@@ -31,9 +31,10 @@ export function updateApi(id, data) {
   })
 }
 
-export function deleteApi(id) {
+export function deleteApi(id, data) {
   return request({
     url: `/casbin/${id}`,
-    method: 'delete'
+    method: 'delete',
+    data
   })
 }
