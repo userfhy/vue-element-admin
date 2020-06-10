@@ -18,7 +18,7 @@
           <el-tag :type="method[k]" size="mini" effect="plain">{{ k }}</el-tag>
         </el-option>
       </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
     </div>

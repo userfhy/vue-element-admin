@@ -7,7 +7,9 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  permissions: [],
+  permisaction: []
 }
 
 const mutations = {
@@ -25,6 +27,9 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_PERMISSIONS: (state, permisaction) => {
+    state.permisaction = permisaction
   }
 }
 
@@ -59,6 +64,7 @@ const actions = {
           reject('getInfo: roles must be a non-null array!')
         }
 
+        commit('SET_PERMISSIONS', data.permissions)
         commit('SET_ROLES', roles)
         commit('SET_NAME', data.name)
         commit('SET_AVATAR', '')
@@ -76,6 +82,7 @@ const actions = {
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
+        commit('SET_PERMISSIONS', [])
         removeToken()
         resetRouter()
 

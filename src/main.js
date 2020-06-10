@@ -6,19 +6,29 @@ import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
 import './styles/element-variables.scss'
-import locale from 'element-ui/lib/locale/lang/zh-CN'// 如果使用中文语言包请默认支持，无需额外引入，请删除该依赖
+// import locale from 'element-ui/lib/locale/lang/zh-CN'// 如果使用中文语言包请默认支持，无需额外引入，请删除该依赖
 
 import '@/styles/index.scss' // global css
 
 import App from './App'
 import store from './store'
 import router from './router'
+import permission from './directive/permission'
 
 import './icons' // icon
 import './permission' // permission control
 import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
+
+import { parseTime, resetForm, addDateRange, selectDictLabel, download } from '@/utils/costum'
+
+// 全局方法挂载
+Vue.prototype.parseTime = parseTime
+Vue.prototype.resetForm = resetForm
+Vue.prototype.addDateRange = addDateRange
+Vue.prototype.selectDictLabel = selectDictLabel
+Vue.prototype.download = download
 
 /**
  * If you don't want to use mock-server
@@ -33,9 +43,11 @@ if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
 
+Vue.use(permission)
+
 Vue.use(Element, {
-  size: Cookies.get('size') || 'medium', // set element-ui default size
-  locale: locale // 如果使用中文，无需设置，请删除
+  size: Cookies.get('size') || 'medium' // set element-ui default size
+//   locale: locale // 如果使用中文，无需设置，请删除
 })
 
 // register global utility filters

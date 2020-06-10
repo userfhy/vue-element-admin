@@ -150,6 +150,15 @@ export const asyncRoutes = [
           title: 'API接口权限',
           roles: ['admin']
         }
+      },
+      {
+        path: 'menu',
+        component: () => import('@/views/menu'),
+        name: 'MenuPermission',
+        meta: {
+          title: '菜单权限',
+          roles: ['admin', 'editor']
+        }
       }
     ]
   },
