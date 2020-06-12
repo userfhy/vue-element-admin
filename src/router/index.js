@@ -121,6 +121,7 @@ export const asyncRoutes = [
         name: 'PagePermission',
         meta: {
           title: '页面权限',
+          icon: 'lock',
           roles: ['admin'] // or you can only set roles in sub nav
         }
       },

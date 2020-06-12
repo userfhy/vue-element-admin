@@ -100,7 +100,7 @@
     </el-table>
 
     <!-- 添加或修改菜单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="600px">
+    <el-dialog :close-on-click-modal="false" :title="title" :visible.sync="open" width="600px">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
@@ -171,8 +171,8 @@
           <el-col :span="12">
             <el-form-item v-if="form.menuType == 'M' || form.menuType == 'C'" label="是否外链">
               <el-radio-group v-model="form.isFrame">
-                <el-radio label="0">是</el-radio>
-                <el-radio label="1">否</el-radio>
+                <el-radio label="1">是</el-radio>
+                <el-radio label="0">否</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -184,7 +184,7 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item v-if="form.menuType == 'F' || form.menuType == 'C'" label="权限标识">
+            <el-form-item v-if="form.menuType == 'F'" label="权限标识">
               <el-input v-model="form.permission" placeholder="请权限标识" maxlength="50" />
             </el-form-item>
           </el-col>
@@ -310,8 +310,8 @@ export default {
         menuType: 'M',
         sort: 0,
         action: this.form.menuType === 'A' ? this.form.action : '',
-        isFrame: '1',
-        visible: '0'
+        isFrame: '0',
+        visible: '1'
       }
       this.resetForm('form')
     },
