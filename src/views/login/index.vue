@@ -49,23 +49,16 @@
 
     </el-form>
 
-    <el-dialog title="Or connect with" :visible.sync="showDialog">
-      Can not be simulated on local, so please combine you own business simulation! ! !
-      <br>
-      <br>
-      <br>
-      <social-sign />
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import { validUsername } from '@/utils/validate'
-import SocialSign from './components/SocialSignin'
+// import SocialSign from './components/SocialSignin'
 
 export default {
   name: 'Login',
-  components: { SocialSign },
+  // components: { SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
@@ -84,7 +77,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],

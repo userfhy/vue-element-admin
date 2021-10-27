@@ -68,7 +68,6 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log(222222222)
     console.log('err' + error) // for debug
     // console.log(window.location.href)
     // console.log(error.response.data.msg)
